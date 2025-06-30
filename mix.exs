@@ -58,7 +58,11 @@ defmodule ClassEase.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:ueberauth, "~> 0.10"},
+      # {:bcrypt_elixir, "~> 3.0"}
+      {:pbkdf2_elixir, "~> 2.0"},
+      {:ueberauth_google, "~> 0.10"}
     ]
   end
 
@@ -84,3 +88,5 @@ defmodule ClassEase.MixProject do
     ]
   end
 end
+
+# cmd /K "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
