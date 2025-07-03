@@ -18,6 +18,12 @@ defmodule ClassEaseWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    # Authentication routes
+    live "/register", AuthLive.Register, :new
+    live "/verify-email/:token", AuthLive.VerifyEmail, :show
+    live "/login", AuthLive.Login, :index
+    live "/dashboard", DashboardLive, :index
   end
 
   # Other scopes may use custom stacks.
