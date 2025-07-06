@@ -26,6 +26,12 @@ defmodule ClassEaseWeb.Router do
     live "/dashboard", DashboardLive, :index
   end
 
+  # scope "/", ClassEaseWeb do
+  #   pipe_through [:browser, :require_authenticated_user]
+
+  #   live "/dashboard", DashboardLive, :index
+  # end
+
   # Other scopes may use custom stacks.
   # scope "/api", ClassEaseWeb do
   #   pipe_through :api
