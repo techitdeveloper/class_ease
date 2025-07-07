@@ -5,7 +5,7 @@ config :class_ease, ClassEase.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "class_ease_dev",
+  database: "class_ease_dev_test",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
