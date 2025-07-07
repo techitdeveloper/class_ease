@@ -1,6 +1,8 @@
 defmodule ClassEaseWeb.Router do
   use ClassEaseWeb, :router
 
+  import ClassEaseWeb.UserAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,29 +10,48 @@ defmodule ClassEaseWeb.Router do
     plug :put_root_layout, html: {ClassEaseWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  # Public routes (no authentication required)
   scope "/", ClassEaseWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+  end
 
-    # Authentication routes
+  # Authentication routes (redirect if already authenticated)
+  scope "/", ClassEaseWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
     live "/register", AuthLive.Register, :new
-    live "/verify-email/:token", AuthLive.VerifyEmail, :show
     live "/login", AuthLive.Login, :index
+    live "/verify-email/:token", AuthLive.VerifyEmail, :show
+  end
+
+  # Protected routes (require authentication)
+  scope "/", ClassEaseWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
     live "/dashboard", DashboardLive, :index
   end
 
-  # scope "/", ClassEaseWeb do
-  #   pipe_through [:browser, :require_authenticated_user]
+  # Auth actions (for login success and logout)
+  scope "/auth", ClassEaseWeb do
+    pipe_through [:browser]
 
-  #   live "/dashboard", DashboardLive, :index
-  # end
+    get "/login-success", UserSessionController, :login_success
+  end
+
+  scope "/", ClassEaseWeb do
+    pipe_through [:browser]
+
+    get "/logout", UserSessionController, :delete
+  end
 
   # Other scopes may use custom stacks.
   # scope "/api", ClassEaseWeb do

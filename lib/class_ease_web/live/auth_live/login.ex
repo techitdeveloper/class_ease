@@ -27,21 +27,26 @@ defmodule ClassEaseWeb.AuthLive.Login do
   def handle_event("save", %{"login" => login_params}, socket) do
     email = login_params["email"]
     password = login_params["password"]
-    _remember_me = login_params["remember_me"] == "true"
+    remember_me = login_params["remember_me"] == "false"
 
     socket = assign(socket, :loading, true)
 
-    case Accounts.login_user(email, password) do
-      {:ok, %{user: user, token: token}} ->
-        # For LiveView, we need to send a message to handle session
-        send(self(), {:login_success, user, token})
+    case Accounts.authenticate_user(email, password) do
+      {:ok, user} ->
+        # Create session token
+        case Accounts.create_user_session_token(user) do
+          {:ok, token} ->
+            # Send message to handle the login in handle_info
+            send(self(), {:login_success, user, token, remember_me})
+            {:noreply, socket}
 
-        socket =
-          socket
-          |> assign(:loading, false)
-          |> put_flash(:info, "Welcome back, #{user.name}!")
-
-        {:noreply, socket}
+          {:error, _} ->
+            socket =
+              socket
+              |> assign(:loading, false)
+              |> put_flash(:error, "An error occurred. Please try again.")
+            {:noreply, socket}
+        end
 
       {:error, :invalid_credentials} ->
         socket =
@@ -58,21 +63,16 @@ defmodule ClassEaseWeb.AuthLive.Login do
           |> put_flash(:error, "Please verify your email address before signing in")
 
         {:noreply, socket}
-
-      {:error, _reason} ->
-        socket =
-          socket
-          |> assign(:loading, false)
-          |> put_flash(:error, "An error occurred. Please try again.")
-
-        {:noreply, socket}
     end
   end
 
-  def handle_info({:login_success, _user, token}, socket) do
-    # This is a workaround for LiveView session handling
-    # In a real app, you might want to use a regular controller for login
-    socket = redirect(socket, to: "/dashboard?token=#{token}")
+  def handle_info({:login_success, _user, token, remember_me}, socket) do
+    # Redirect to a controller action that will handle the session
+    socket =
+      socket
+      |> assign(:loading, false)
+      |> redirect(to: ~p"/auth/login-success?token=#{token}&remember_me=#{remember_me}")
+
     {:noreply, socket}
   end
 end
